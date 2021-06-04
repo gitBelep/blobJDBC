@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.function.Predicate;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DogDaoTest {
@@ -83,6 +85,21 @@ public class DogDaoTest {
         assertArrayEquals(dogArr1, isArr);
         assertArrayEquals(dogArr2, isArr);
         assertThrows(IllegalStateException.class, () -> dao.getImageByDogName("non Existing"));
+    }
+
+    @Test
+    void testUpdateDogNamesByCountry(){
+        dao.updateDogNamesByCountry("GREAT BRITAIN", "GB");
+        dao.updateDogNamesByCountry("HUNGARY", "HUN");
+        List<String> gbNames = dao.getDogsByCountry("GREAT BRITAIN");
+        List<String> hunNames = dao.getDogsByCountry("HUNGARY");
+        boolean containsGB = gbNames.stream()
+                .allMatch(s -> s.contains("gb"));
+        boolean containsHun = hunNames.stream()
+                .allMatch(a -> a.contains("hun"));
+
+        assertTrue(containsGB);
+        assertTrue(containsHun);
     }
 
 }
