@@ -163,4 +163,34 @@ public class DogDao {
         }
     }
 
+    public List<String> readMetadata(){
+        try(Connection conn = ds.getConnection()) {
+            DatabaseMetaData metaData = conn.getMetaData();
+            return getTableNames(metaData);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Cannot connect", e);
+        }
+    }
+
+    private List<String>  getTableNames(DatabaseMetaData metaData) throws SQLException {
+        try(ResultSet rs = metaData.getTables(null,null,null,null)
+        ){
+            List<String> allData = new ArrayList<>();
+            while(rs.next()){
+                allData.add( rs.getString(1));
+                allData.add( rs.getString(2));
+                allData.add( rs.getString(3));
+                allData.add( rs.getString(4));
+                allData.add( rs.getString(5));
+                allData.add( rs.getString(6));
+                allData.add( rs.getString(7));
+                allData.add( rs.getString(8));
+                allData.add( rs.getString(9));
+                allData.add( rs.getString(10));
+                allData.add("\n");
+            }
+            return allData;
+        }
+    }
+
 }

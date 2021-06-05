@@ -130,4 +130,11 @@ public class DogDaoTest {
         }
     }
 
+    @Test
+    void testMetaData(){
+        List<String> data = dao.readMetadata();
+        System.out.println(data.toString());
+        assertEquals((10 + 1) * 3, data.size());
+    }
+
 }
