@@ -10,8 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.function.Predicate;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DogDaoTest {
@@ -19,20 +17,14 @@ public class DogDaoTest {
 
     @BeforeEach
     void init() throws SQLException {
-        MariaDbDataSource dataSource;
-        dataSource = new MariaDbDataSource();
-        dataSource.setUrl("jdbc:mariadb://localhost:3306/employees?useUnicode=true");
-        dataSource.setUser("employees");
-        dataSource.setPassword("employees");
+        dao = new DogDao();
+        MariaDbDataSource dataSource = dao.getDs();
 
         Flyway flyway = Flyway.configure()
                 .locations("/db/migration/dogs")
                 .dataSource(dataSource).load();
-
         flyway.clean();
         flyway.migrate();
-
-        dao = new DogDao(dataSource);
     }
 
     @Test
@@ -52,7 +44,6 @@ public class DogDaoTest {
 //read stream does not exist any more
         InputStream is2 = Files.newInputStream(Path.of("c:", "training", "blob","src","main","resources",inputFile));
         dao.addImage(inputFile, 40, is2);
-
     }
 
     @Test
@@ -132,7 +123,7 @@ public class DogDaoTest {
 
     @Test
     void testMetaData(){
-        List<String> data = dao.readMetadata();
+        List<String> data = dao.readMetadataAboutDB();
         System.out.println(data.toString());
         assertEquals((10 + 1) * 3, data.size());
     }

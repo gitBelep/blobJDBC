@@ -1,6 +1,6 @@
 package dog;
 
-import javax.sql.DataSource;
+import org.mariadb.jdbc.MariaDbDataSource;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,12 +9,31 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 public class DogDao {
-    DataSource ds;
+    MariaDbDataSource ds;
 
-    public DogDao(DataSource ds) {
-        this.ds = ds;
+    public DogDao() {
+        Properties prop = new Properties();
+        try(InputStream is = DogDao.class.getResourceAsStream("/dog.properties")) {
+            prop.load(is);
+
+            String url = prop.getProperty("Url");
+            String user = prop.getProperty("User");
+            String password = prop.getProperty("Password");
+
+            ds = new MariaDbDataSource();
+            ds.setUrl(url);
+            ds.setUser(user);
+            ds.setPassword(password);
+        } catch (IOException | SQLException e){
+            throw new IllegalStateException("Cannot read dog.properties", e);
+        }
+    }
+
+    public MariaDbDataSource getDs() {
+        return ds;
     }
 
     public List<String> getDogsByCountry(String country) {
@@ -163,16 +182,16 @@ public class DogDao {
         }
     }
 
-    public List<String> readMetadata(){
+    public List<String> readMetadataAboutDB(){
         try(Connection conn = ds.getConnection()) {
             DatabaseMetaData metaData = conn.getMetaData();
-            return getTableNames(metaData);
+            return getMetadata(metaData);
         } catch (SQLException e) {
             throw new IllegalStateException("Cannot connect", e);
         }
     }
 
-    private List<String>  getTableNames(DatabaseMetaData metaData) throws SQLException {
+    private List<String> getMetadata(DatabaseMetaData metaData) throws SQLException {
         try(ResultSet rs = metaData.getTables(null,null,null,null)
         ){
             List<String> allData = new ArrayList<>();
