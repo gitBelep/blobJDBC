@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DogDao {
@@ -98,7 +99,7 @@ public class DogDao {
         String dogName = "";
         try (Connection conn = ds.getConnection();
              Statement st = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-             ResultSet rs = st.executeQuery(
+             ResultSet rs = st.executeQuery(           //id required!
                      "SELECT id, name, country FROM dog_types"
              )) {
             while (rs.next()) {
@@ -111,6 +112,26 @@ public class DogDao {
              }
         } catch (SQLException e) {
             throw new IllegalArgumentException("Cannot update" + dogName, e);
+        }
+    }
+
+    public List<String> listOddNames(){
+        try(Connection conn = ds.getConnection();
+            Statement st = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rs = st.executeQuery(
+        "SELECT id, name FROM dog_types"
+            )){
+            List<String> names = new ArrayList<>();
+            if (!rs.next()){
+                return Collections.emptyList();    //or names
+            }
+            names.add( rs.getLong("id") +" "+ rs.getString( "name" ) );
+            while(rs.relative(2)){
+                names.add( rs.getLong("id") +" "+ rs.getString( "name" ) );
+            }
+            return names;
+        } catch (SQLException e) {
+            throw new IllegalArgumentException("Cannot access", e);
         }
     }
 

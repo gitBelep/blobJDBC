@@ -102,4 +102,18 @@ public class DogDaoTest {
         assertTrue(containsHun);
     }
 
+    @Test
+    void testOddNames(){
+        List<String> oddNames = dao.listOddNames();
+
+        assertEquals( 177, oddNames.size());      //seems to be 368 rows :-) but it isn't
+
+        int rowNr = 1;
+        for(String s : oddNames){
+            System.out.println(rowNr +" "+ s);
+            rowNr +=2;
+        }
+
+    }
+
 }
