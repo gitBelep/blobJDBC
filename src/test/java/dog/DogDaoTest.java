@@ -103,6 +103,21 @@ public class DogDaoTest {
     }
 
     @Test
+    void testUpdateDogNamesByCountryWithPreparedStatement(){
+        dao.updateDogNamesByCountryWithPrepStatement("GREAT BRITAIN", "GB");
+        dao.updateDogNamesByCountryWithPrepStatement("HUNGARY", "HUN");
+        List<String> gbNames = dao.getDogsByCountry("GREAT BRITAIN");
+        List<String> hunNames = dao.getDogsByCountry("HUNGARY");
+        boolean containsGB = gbNames.stream()
+                .allMatch(s -> s.contains("gb"));
+        boolean containsHun = hunNames.stream()
+                .allMatch(a -> a.contains("hun"));
+
+        assertTrue(containsGB);
+        assertTrue(containsHun);
+    }
+
+    @Test
     void testOddNames(){
         List<String> oddNames = dao.listOddNames();
 
@@ -113,7 +128,6 @@ public class DogDaoTest {
             System.out.println(rowNr +" "+ s);
             rowNr +=2;
         }
-
     }
 
 }

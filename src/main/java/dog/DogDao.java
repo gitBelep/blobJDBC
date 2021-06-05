@@ -109,25 +109,53 @@ public class DogDao {
                     rs.updateString("name", preposition.concat("_").concat(dogName));
                     rs.updateRow();
                 }
-             }
+            }
         } catch (SQLException e) {
             throw new IllegalArgumentException("Cannot update" + dogName, e);
         }
     }
 
-    public List<String> listOddNames(){
-        try(Connection conn = ds.getConnection();
-            Statement st = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ResultSet rs = st.executeQuery(
-        "SELECT id, name FROM dog_types"
-            )){
+    public void updateDogNamesByCountryWithPrepStatement(String country, String preposition) {
+        try (Connection conn = ds.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT id, name FROM dog_types WHERE country = ?",
+                     ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE
+             )) {
+            ps.setString(1, country);
+            modifyByPreparedStatement(ps, preposition);
+        } catch (SQLException e) {
+            throw new IllegalArgumentException("Cannot access", e);
+        }
+    }
+
+    private void modifyByPreparedStatement(PreparedStatement ps, String preposition) {
+        String dogName = "";
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                dogName = rs.getString("name");
+                if (!dogName.contains(preposition)) {
+                    rs.updateString("name", preposition.concat("_").concat(dogName));
+                    rs.updateRow();
+                }
+            }
+        } catch(SQLException se){
+            throw new IllegalArgumentException("Cannot update" + dogName, se);
+        }
+    }
+
+    public List<String> listOddNames() {
+        try (Connection conn = ds.getConnection();
+             Statement st = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+             ResultSet rs = st.executeQuery(
+                     "SELECT id, name FROM dog_types"
+             )) {
             List<String> names = new ArrayList<>();
-            if (!rs.next()){
+            if (!rs.next()) {
                 return Collections.emptyList();    //or names
             }
-            names.add( rs.getLong("id") +" "+ rs.getString( "name" ) );
-            while(rs.relative(2)){
-                names.add( rs.getLong("id") +" "+ rs.getString( "name" ) );
+            names.add(rs.getLong("id") + " " + rs.getString("name"));
+            while (rs.relative(2)) {
+                names.add(rs.getLong("id") + " " + rs.getString("name"));
             }
             return names;
         } catch (SQLException e) {
